@@ -5,49 +5,40 @@ import Movie from './Movie'
 
 class App extends Component {
 
-  state = {
-  }
-
+  state = {}
   componentDidMount(){
-    setTimeout(()=>{
-      this.setState({
-        movies : [
-          {
-            title : "Matrix",
-            poster : "https://images-na.ssl-images-amazon.com/images/I/51EG732BV3L._SY445_.jpg"
-          },
-          {
-            title : "Full Metal Jacket",
-            poster : "https://ia.media-imdb.com/images/M/MV5BNzc2ZThkOGItZGY5YS00MDYwLTkyOTAtNDRmZWIwMGRhYTc0L2ltYWdlXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_UX182_CR0,0,182,268_AL_.jpg"
-          },
-          {
-            title : "Oldboy",
-            poster : "https://upload.wikimedia.org/wikipedia/en/thumb/6/67/Oldboykoreanposter.jpg/220px-Oldboykoreanposter.jpg"
-          },
-          {
-            title : "Star Wars",
-            poster : "http://cdn.collider.com/wp-content/uploads/2018/02/star-wars-the-last-jedi-blu-ray-cover.jpg"
-          },
-          {
-            title : "Transpotting",
-            poster : "http://monster-poster.com/site/wp-content/uploads/2016/10/FR_0003-1.jpg"
-          }
-        ]
-      });
-    },5000);
+    this._getMovies();
   }
 
   _renderMovies = () => {
-   const movies = this.state.movies.map((movie, index) => {
-      return <Movie title = {movie.title} poster= {movie.poster} key={index}/>
+   const movies = this.state.movies.map(movie => {
+      return <Movie 
+        title = {movie.title_english} 
+        poster= {movie.medium_cover_image} 
+        key={movie.id}
+        genres = {movie.genres}
+        synopsis = {movie.synopsis}/>
     });
     return movies
   }
 
+  _getMovies = async () => {
+    const movies = await this._callApi()
+    this.setState({movies})
+  }
+
+  _callApi = () =>{
+    return fetch('https://yts.am/api/v2/list_movies.json?sort_by=rating')
+    .then(response => response.json())
+    .then(json => json.data.movies)
+    .catch(err => console.log(err))
+  }
+
   render() {
+    const {movies} = this.state;
     return (
-      <div className="App">
-        {this.state.movies ? this._renderMovies() : "loading"}
+      <div className= {movies? "App" : "App--loading"}>
+        {movies ? this._renderMovies() : "loading"}
       </div>
     );
   }
